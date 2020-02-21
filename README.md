@@ -7,10 +7,13 @@
 <p align="center">
 	<img src="resource/arch.png" width="550">
 </p>
+
 代码分为文件系统和虚拟磁盘两个部分。在文件系统中，所有函数不直接操作虚拟磁盘`block vdisk[1000]`中的数据（尽管虚拟磁盘`vdisk`在内存中，而且是全局变量，这些函数是可以直接访问到`vdisk`中的数据的）,而是通过调用`visual disk`模块提供的API进行控制操作和IO操作(`saveblock()`和`loadblock()`)。事实上，`file system`并不知道磁盘是虚拟的，假设我们要使用真实的磁盘硬件来运行我们的文件系统，也只需要该硬件的驱动实现了相同功能的API供我们的文件系统调用即可，而几乎不需要改动我们的文件系统的代码。
+
 <p align="center">
 	<img src="resource/model.png" width="550">
 </p>
+
 读数据流程举例：文件系统调用`loadblock(id)`将数据读到`buffer`，然后将数据从`buffer`取出放入`malloc`的一块内存块中，该数据块即为磁盘中的一块数据在逻辑内存中的复制，CPU可以读写这些数据块。为了确定数据块的位置，在`useropen`中加入了一个指针数组`block *mem[1000]`，初始值均为`Null`，读入一个数据块后对应指针指向该数据块，关闭文件时`free`所有该文件在内存的数据块，若文件已更改，需要将数据块写回`vdisk`。一般打开一个文件时，不读入该文件在磁盘的所有数据块，只读入第一个块，后续都是按需读取，例如现在需要使用第`j`块数据，检查`mem[j]`，非`Null`则可直接使用在内存的数据块，如果是`NULL`则需要进行磁盘io（即调用`loadblock(id)`）
 
 ## Other Feature
