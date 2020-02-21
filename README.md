@@ -5,7 +5,7 @@
 ## System Design
 
 <p align="center">
-	<img src="resource/arch.png" width="550">
+	<img src="resource/arch.png" width="350">
 </p>
 
 代码分为文件系统和虚拟磁盘两个部分。在文件系统中，所有函数不直接操作虚拟磁盘`block vdisk[1000]`中的数据（尽管虚拟磁盘`vdisk`在内存中，而且是全局变量，这些函数是可以直接访问到`vdisk`中的数据的）,而是通过调用`visual disk`模块提供的API进行控制操作和IO操作(`saveblock()`和`loadblock()`)。事实上，`file system`并不知道磁盘是虚拟的，假设我们要使用真实的磁盘硬件来运行我们的文件系统，也只需要该硬件的驱动实现了相同功能的API供我们的文件系统调用即可，而几乎不需要改动我们的文件系统的代码。
